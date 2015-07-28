@@ -33,7 +33,6 @@
 #
 #------------------------------------------------------------------------------
 
-LSMOD=/sbin/lsmod
 MODPROBE=/sbin/modprobe
 RMMOD=/sbin/rmmod
 MODINFO=/sbin/modinfo
@@ -108,9 +107,9 @@ start)
             continue # ec_* module not found
         fi
 
-        if [ ${MODULE} != "generic" -a ${MODULE} != "ccat" ]; then
+        if [ ${MODULE} != "generic" ]; then
             # try to unload standard module
-            if ${LSMOD} | grep "^${MODULE} " > /dev/null; then
+            if lsmod | grep "^${MODULE} " > /dev/null; then
                 if ! ${RMMOD} ${MODULE}; then
                     ${RMMOD} ${LOADED_MODULES}
                     exit 1
@@ -119,7 +118,7 @@ start)
         fi
 
         if ! ${MODPROBE} ${MODPROBE_FLAGS} ${ECMODULE}; then
-            if [ ${MODULE} != "generic" -a ${MODULE} != "ccat" ]; then
+            if [ ${MODULE} != "generic" ]; then
                 ${MODPROBE} ${MODPROBE_FLAGS} ${MODULE} # try to restore
             fi
             ${RMMOD} ${LOADED_MODULES}
@@ -138,7 +137,7 @@ stop)
     # unload EtherCAT device modules
     for MODULE in ${DEVICE_MODULES} master; do
         ECMODULE=ec_${MODULE}
-        if ! ${LSMOD} | grep -q "^${ECMODULE} "; then
+        if ! lsmod | grep -q "^${ECMODULE} "; then
             continue # ec_* module not loaded
         fi
         if ! ${RMMOD} ${ECMODULE}; then
@@ -150,7 +149,7 @@ stop)
 
     # load standard modules again
     for MODULE in ${DEVICE_MODULES}; do
-        if [ ${MODULE} == "generic" -o ${MODULE} == "ccat" ]; then
+        if [ ${MODULE} == "generic" ]; then
             continue
         fi
         ${MODPROBE} ${MODPROBE_FLAGS} ${MODULE}

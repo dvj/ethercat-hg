@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: domain.h,v d461b1f07296 2012/11/30 19:15:31 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -72,11 +72,6 @@ struct ec_domain
                                              since last notification. */
     unsigned int redundancy_active; /**< Non-zero, if redundancy is in use. */
     unsigned long notify_jiffies; /**< Time of last notification. */
-    uint32_t offset_used[EC_DIR_COUNT]; /**< Next available domain offset of
-        PDO, by direction */
-    const ec_slave_config_t *sc_in_work; /**< slave_config which is actively
-        being registered in this domain
-        (i.e. ecrt_slave_config_reg_pdo_entry() ) */
 };
 
 /*****************************************************************************/

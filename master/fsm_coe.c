@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: fsm_coe.c,v ec403cf308eb 2013/02/12 14:46:43 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -318,8 +318,7 @@ int ec_fsm_coe_prepare_dict(
         )
 {
     ec_slave_t *slave = fsm->slave;
-    uint8_t *data = ec_slave_mbox_prepare_send(slave, datagram,
-			EC_MBOX_TYPE_COE, 8);
+    uint8_t *data = ec_slave_mbox_prepare_send(slave, datagram, 0x03, 8);
     if (IS_ERR(data)) {
         return PTR_ERR(data);
     }
@@ -471,8 +470,7 @@ int ec_fsm_coe_dict_prepare_desc(
         )
 {
     ec_slave_t *slave = fsm->slave;
-    u8 *data = ec_slave_mbox_prepare_send(slave, datagram, EC_MBOX_TYPE_COE,
-			8);
+    u8 *data = ec_slave_mbox_prepare_send(slave, datagram, 0x03, 8);
     if (IS_ERR(data)) {
         return PTR_ERR(data);
     }
@@ -534,7 +532,7 @@ void ec_fsm_coe_dict_response(
         return;
     }
 
-    if (mbox_prot != EC_MBOX_TYPE_COE) {
+    if (mbox_prot != 0x03) { // CoE
         EC_SLAVE_ERR(slave, "Received mailbox protocol 0x%02X as response.\n",
                 mbox_prot);
         fsm->state = ec_fsm_coe_error;
@@ -754,8 +752,7 @@ int ec_fsm_coe_dict_prepare_entry(
         )
 {
     ec_slave_t *slave = fsm->slave;
-    u8 *data = ec_slave_mbox_prepare_send(slave, datagram, EC_MBOX_TYPE_COE,
-			10);
+    u8 *data = ec_slave_mbox_prepare_send(slave, datagram, 0x03, 10);
     if (IS_ERR(data)) {
         return PTR_ERR(data);
     }
@@ -816,7 +813,7 @@ void ec_fsm_coe_dict_desc_response(
         return;
     }
 
-    if (mbox_prot != EC_MBOX_TYPE_COE) {
+    if (mbox_prot != 0x03) { // CoE
         EC_SLAVE_ERR(slave, "Received mailbox protocol 0x%02X as response.\n",
                 mbox_prot);
         fsm->state = ec_fsm_coe_error;
@@ -1052,7 +1049,7 @@ void ec_fsm_coe_dict_entry_response(
         return;
     }
 
-    if (mbox_prot != EC_MBOX_TYPE_COE) {
+    if (mbox_prot != 0x03) { // CoE
         EC_SLAVE_ERR(slave, "Received mailbox protocol"
                 " 0x%02X as response.\n", mbox_prot);
         fsm->state = ec_fsm_coe_error;
@@ -1203,7 +1200,7 @@ int ec_fsm_coe_prepare_down_start(
     uint8_t data_set_size;
 
     if (request->data_size <= 4) { // use expedited transfer type
-        data = ec_slave_mbox_prepare_send(slave, datagram, EC_MBOX_TYPE_COE,
+        data = ec_slave_mbox_prepare_send(slave, datagram, 0x03,
                 EC_COE_DOWN_REQ_HEADER_SIZE);
         if (IS_ERR(data)) {
             request->errno = PTR_ERR(data);
@@ -1244,7 +1241,7 @@ int ec_fsm_coe_prepare_down_start(
             data_size = required_data_size;
         }
 
-        data = ec_slave_mbox_prepare_send(slave, datagram, EC_MBOX_TYPE_COE,
+        data = ec_slave_mbox_prepare_send(slave, datagram, 0x03,
                 data_size);
         if (IS_ERR(data)) {
             request->errno = PTR_ERR(data);
@@ -1494,7 +1491,7 @@ void ec_fsm_coe_down_prepare_segment_request(
             + EC_COE_DOWN_SEG_MIN_DATA_SIZE;
     }
 
-    data = ec_slave_mbox_prepare_send(slave, datagram, EC_MBOX_TYPE_COE,
+    data = ec_slave_mbox_prepare_send(slave, datagram, 0x03,
             data_size);
     if (IS_ERR(data)) {
         request->errno = PTR_ERR(data);
@@ -1568,7 +1565,7 @@ void ec_fsm_coe_down_response(
         return;
     }
 
-    if (mbox_prot != EC_MBOX_TYPE_COE) {
+    if (mbox_prot != 0x03) { // CoE
         request->errno = EIO;
         fsm->state = ec_fsm_coe_error;
         EC_SLAVE_ERR(slave, "Received mailbox protocol 0x%02X as response.\n",
@@ -1746,7 +1743,7 @@ void ec_fsm_coe_down_seg_response(
         return;
     }
 
-    if (mbox_prot != EC_MBOX_TYPE_COE) {
+    if (mbox_prot != 0x03) { // CoE
         request->errno = EIO;
         fsm->state = ec_fsm_coe_error;
         EC_SLAVE_ERR(slave, "Received mailbox protocol 0x%02X as response.\n",
@@ -1847,8 +1844,7 @@ int ec_fsm_coe_prepare_up(
     ec_sdo_request_t *request = fsm->request;
     ec_master_t *master = slave->master;
 
-    u8 *data = ec_slave_mbox_prepare_send(slave, datagram, EC_MBOX_TYPE_COE,
-			10);
+    u8 *data = ec_slave_mbox_prepare_send(slave, datagram, 0x03, 10);
     if (IS_ERR(data)) {
         request->errno = PTR_ERR(data);
         return PTR_ERR(data);
@@ -2039,8 +2035,7 @@ void ec_fsm_coe_up_prepare_segment_request(
         )
 {
     uint8_t *data =
-        ec_slave_mbox_prepare_send(fsm->slave, datagram, EC_MBOX_TYPE_COE,
-				10);
+        ec_slave_mbox_prepare_send(fsm->slave, datagram, 0x03, 10);
     if (IS_ERR(data)) {
         fsm->request->errno = PTR_ERR(data);
         fsm->state = ec_fsm_coe_error;
@@ -2113,7 +2108,7 @@ void ec_fsm_coe_up_response(
         ec_print_data(data, rec_size);
     }
 
-    if (mbox_prot != EC_MBOX_TYPE_COE) {
+    if (mbox_prot != 0x03) { // CoE
         request->errno = EIO;
         fsm->state = ec_fsm_coe_error;
         EC_SLAVE_WARN(slave, "Received mailbox protocol 0x%02X"
@@ -2418,7 +2413,7 @@ void ec_fsm_coe_up_seg_response(
         ec_print_data(data, rec_size);
     }
 
-    if (mbox_prot != EC_MBOX_TYPE_COE) {
+    if (mbox_prot != 0x03) { // CoE
         EC_SLAVE_ERR(slave, "Received mailbox protocol 0x%02X as response.\n",
                 mbox_prot);
         request->errno = EIO;

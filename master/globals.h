@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: globals.h,v d461b1f07296 2012/11/30 19:15:31 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -88,14 +88,8 @@
 #define EC_ADDR_LEN 4
 
 /** Resulting maximum data size of a single datagram in a frame. */
-#ifdef DEBUG_DATAGRAM_OVERFLOW
-// Define a runt datagram which can be easily overflowed on 
-// available hardware for use when testing ec_domain_finish()
-#define EC_MAX_DATA_SIZE (128)
-#else
 #define EC_MAX_DATA_SIZE (ETH_DATA_LEN - EC_FRAME_HEADER_SIZE \
                           - EC_DATAGRAM_HEADER_SIZE - EC_DATAGRAM_FOOTER_SIZE)
-#endif // DEBUG_DATAGRAM_OVERFLOW
 
 /** Mailbox header size.  */
 #define EC_MBOX_HEADER_SIZE 6
@@ -120,12 +114,6 @@
  * This is also used as the maximum lenth of EoE device names.
  **/
 #define EC_DATAGRAM_NAME_SIZE 20
-
-/** Maximum hostname size.
- *
- * Used inside the EoE set IP parameter request.
- */
-#define EC_MAX_HOSTNAME_SIZE 32
 
 /** Slave state mask.
  *
@@ -154,9 +142,6 @@ typedef enum {
 } ec_slave_state_t;
 
 /** Supported mailbox protocols.
- *
- * Not to mix up with the mailbox type field in the mailbox header defined in
- * master/mailbox.h.
  */
 enum {
     EC_MBOX_AOE = 0x01, /**< ADS over EtherCAT */

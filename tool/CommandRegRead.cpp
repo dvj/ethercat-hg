@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id$
+ *  $Id: CommandRegRead.cpp,v 2c3ccdde3919 2012/11/14 21:12:57 fp $
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -149,7 +149,6 @@ void CommandRegRead::execute(const StringVector &args)
         throwSingleSlaveRequired(slaves.size());
     }
     io.slave_position = slaves.front().position;
-    io.emergency = false;
 
     io.data = new uint8_t[io.size];
 

@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id$
+ *  $Id: main.cpp,v 960cc1bb6b4a 2012/10/24 16:21:52 fp $
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -48,7 +48,6 @@ using namespace std;
 #include "CommandFoeRead.h"
 #include "CommandFoeWrite.h"
 #include "CommandGraph.h"
-#include "CommandIp.h"
 #include "CommandMaster.h"
 #include "CommandPdos.h"
 #include "CommandRegRead.h"
@@ -84,7 +83,6 @@ string domains = "-"; // all domains
 string dataTypeStr;
 Command::Verbosity verbosity = Command::Normal;
 bool force = false;
-bool emergency = false;
 bool helpRequested = false;
 string outputFile;
 string skin;
@@ -151,7 +149,6 @@ void getOptions(int argc, char **argv)
         {"type",        required_argument, NULL, 't'},
         {"output-file", required_argument, NULL, 'o'},
         {"skin",        required_argument, NULL, 's'},
-        {"emergency",   no_argument,       NULL, 'e'},
         {"force",       no_argument,       NULL, 'f'},
         {"quiet",       no_argument,       NULL, 'q'},
         {"verbose",     no_argument,       NULL, 'v'},
@@ -160,7 +157,7 @@ void getOptions(int argc, char **argv)
     };
 
     do {
-        c = getopt_long(argc, argv, "m:a:p:d:t:o:s:efqvh", longOptions, NULL);
+        c = getopt_long(argc, argv, "m:a:p:d:t:o:s:fqvh", longOptions, NULL);
 
         switch (c) {
             case 'm':
@@ -189,10 +186,6 @@ void getOptions(int argc, char **argv)
 
             case 's':
                 skin = optarg;
-                break;
-
-            case 'e':
-                emergency = true;
                 break;
 
             case 'f':
@@ -289,7 +282,6 @@ int main(int argc, char **argv)
     commandList.push_back(new CommandFoeRead());
     commandList.push_back(new CommandFoeWrite());
     commandList.push_back(new CommandGraph());
-    commandList.push_back(new CommandIp());
     commandList.push_back(new CommandMaster());
     commandList.push_back(new CommandPdos());
     commandList.push_back(new CommandRegRead());
@@ -323,7 +315,6 @@ int main(int argc, char **argv)
                     cmd->setDataType(dataTypeStr);
                     cmd->setOutputFile(outputFile);
                     cmd->setSkin(skin);
-                    cmd->setEmergency(emergency);
                     cmd->setForce(force);
                     cmd->execute(commandArgs);
                 } catch (InvalidUsageException &e) {

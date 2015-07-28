@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: slave.h,v ec403cf308eb 2013/02/12 14:46:43 fp $
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -113,24 +113,6 @@
 
 /*****************************************************************************/
 
-#ifdef EC_LOOP_CONTROL
-
-/** Slave port state.
- */
-typedef enum {
-    EC_SLAVE_PORT_DOWN,
-    EC_SLAVE_PORT_WAIT,
-    EC_SLAVE_PORT_UP
-} ec_slave_port_state_t;
-
-/** Wait time in [ms] from detecting a link to opening a port.
- */
-#define EC_PORT_WAIT_MS 2000
-
-#endif
-
-/*****************************************************************************/
-
 /** Slave port.
  */
 typedef struct {
@@ -141,10 +123,6 @@ typedef struct {
                                             measurement. */
     uint32_t delay_to_next_dc; /**< Delay to next slave with DC support behind
                                  this port [ns]. */
-#ifdef EC_LOOP_CONTROL
-    ec_slave_port_state_t state; /**< Port state for loop control. */
-    unsigned long link_detection_jiffies; /**< Time of link detection. */
-#endif
 } ec_slave_port_t;
 
 /*****************************************************************************/
@@ -250,9 +228,8 @@ struct ec_slave
 
     struct list_head sdo_requests; /**< SDO access requests. */
     struct list_head reg_requests; /**< Register access requests. */
-    struct list_head foe_requests; /**< FoE requests. */
-    struct list_head soe_requests; /**< SoE requests. */
-    struct list_head eoe_requests; /**< EoE set IP parameter requests. */
+    struct list_head foe_requests; /**< FoE write requests. */
+    struct list_head soe_requests; /**< SoE write requests. */
 
     ec_fsm_slave_t fsm; /**< Slave state machine. */
 };
@@ -267,8 +244,7 @@ void ec_slave_clear(ec_slave_t *);
 void ec_slave_clear_sync_managers(ec_slave_t *);
 
 void ec_slave_request_state(ec_slave_t *, ec_slave_state_t);
-void ec_slave_set_dl_status(ec_slave_t *, uint16_t);
-void ec_slave_set_al_status(ec_slave_t *, ec_slave_state_t);
+void ec_slave_set_state(ec_slave_t *, ec_slave_state_t);
 
 // SII categories
 int ec_slave_fetch_sii_strings(ec_slave_t *, const uint8_t *, size_t);

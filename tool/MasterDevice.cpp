@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id$
+ *  $Id: MasterDevice.cpp,v bc2d4bf9cbe5 2012/09/06 18:22:24 fp $
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -580,21 +580,6 @@ void MasterDevice::writeSoe(ec_ioctl_slave_soe_write_t *data)
         } else {
             stringstream err;
             err << "Failed to write IDN: " << strerror(errno);
-            throw MasterDeviceException(err);
-        }
-    }
-}
-
-/****************************************************************************/
-
-void MasterDevice::setIpParam(ec_ioctl_slave_eoe_ip_t *data)
-{
-    if (ioctl(fd, EC_IOCTL_SLAVE_EOE_IP_PARAM, data) < 0) {
-        if (errno == EIO && data->result) {
-            throw MasterDeviceEoeException(data->result);
-        } else {
-            stringstream err;
-            err << "Failed to set IP parameters: " << strerror(errno);
             throw MasterDeviceException(err);
         }
     }

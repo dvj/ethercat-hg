@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id$
+ *  $Id: rtdm.c,v 6d9865c37b6f 2013/02/12 16:15:09 fp $
  *
  *  Copyright (C) 2009-2010  Moehwald GmbH B. Benner
  *                     2011  IgH Andreas Stewering-Bone

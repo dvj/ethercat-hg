@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: fsm_slave_scan.c,v 1e8d9fcb5100 2013/02/06 16:52:07 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -493,6 +493,8 @@ void ec_fsm_slave_scan_state_datalink(
 {
     ec_datagram_t *datagram = fsm->datagram;
     ec_slave_t *slave = fsm->slave;
+    uint16_t dl_status;
+    unsigned int i;
 
     if (datagram->state == EC_DATAGRAM_TIMED_OUT && fsm->retries--)
         return;
@@ -512,7 +514,15 @@ void ec_fsm_slave_scan_state_datalink(
         return;
     }
 
-    ec_slave_set_dl_status(slave, EC_READ_U16(datagram->data));
+    dl_status = EC_READ_U16(datagram->data);
+    for (i = 0; i < EC_MAX_PORTS; i++) {
+        slave->ports[i].link.link_up =
+            dl_status & (1 << (4 + i)) ? 1 : 0;
+        slave->ports[i].link.loop_closed =
+            dl_status & (1 << (8 + i * 2)) ? 1 : 0;
+        slave->ports[i].link.signal_detected =
+            dl_status & (1 << (9 + i * 2)) ? 1 : 0;
+    }
 
 #ifdef EC_SII_ASSIGN
     ec_fsm_slave_scan_enter_assign_sii(fsm);

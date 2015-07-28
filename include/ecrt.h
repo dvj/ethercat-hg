@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: ecrt.h,v 6d9865c37b6f 2013/02/12 16:15:09 fp $
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -815,7 +815,7 @@ int ecrt_master_sdo_download(
         uint16_t slave_position, /**< Slave position. */
         uint16_t index, /**< Index of the SDO. */
         uint8_t subindex, /**< Subindex of the SDO. */
-        const uint8_t *data, /**< Data buffer to download. */
+        uint8_t *data, /**< Data buffer to download. */
         size_t data_size, /**< Size of the data buffer. */
         uint32_t *abort_code /**< Abort code of the SDO download. */
         );
@@ -834,7 +834,7 @@ int ecrt_master_sdo_download_complete(
         ec_master_t *master, /**< EtherCAT master. */
         uint16_t slave_position, /**< Slave position. */
         uint16_t index, /**< Index of the SDO. */
-        const uint8_t *data, /**< Data buffer to download. */
+        uint8_t *data, /**< Data buffer to download. */
         size_t data_size, /**< Size of the data buffer. */
         uint32_t *abort_code /**< Abort code of the SDO download. */
         );
@@ -956,10 +956,8 @@ int ecrt_master_set_send_interval(
  *
  * Has to be called cyclically by the application after ecrt_master_activate()
  * has returned.
- *
- * Returns the number of bytes sent.
  */
-size_t ecrt_master_send(
+void ecrt_master_send(
         ec_master_t *master /**< EtherCAT master. */
         );
 
@@ -1146,17 +1144,6 @@ void ecrt_slave_config_watchdog(
                                       is not written, so the default is used.
                                      */
         );
-
-/** Configure whether a slave allows overlapping PDOs.
- *
- * Overlapping PDOs allows inputs to use the same space as outputs on the frame.
- * This reduces the frame length.
- */
-void ecrt_slave_config_overlapping_pdos(
-        ec_slave_config_t *sc, /**< Slave configuration. */
-        uint8_t allow_overlapping_pdos /**< Allow overlapping PDOs */
-        );
-
 
 /** Add a PDO to a sync manager's PDO assignment.
  *

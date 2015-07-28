@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: slave_config.h,v ec403cf308eb 2013/02/12 14:46:43 fp $
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -130,8 +130,6 @@ struct ec_slave_config {
     uint16_t watchdog_intervals; /**< Process data watchdog intervals (see
                                    spec. reg. 0x0420). */
 
-    uint8_t allow_overlapping_pdos;	/**< Allow input PDOs use the same frame space
-                                      as output PDOs. */
     ec_slave_t *slave; /**< Slave pointer. This is \a NULL, if the slave is
                          offline. */
 
@@ -174,7 +172,6 @@ ec_reg_request_t *ec_slave_config_find_reg_request(ec_slave_config_t *,
         unsigned int);
 ec_voe_handler_t *ec_slave_config_find_voe_handler(ec_slave_config_t *,
         unsigned int);
-void ec_slave_config_expire_disconnected_requests(ec_slave_config_t *);
 
 ec_sdo_request_t *ecrt_slave_config_create_sdo_request_err(
         ec_slave_config_t *, uint16_t, uint8_t, size_t);

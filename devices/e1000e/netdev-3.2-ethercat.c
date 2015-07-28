@@ -6360,12 +6360,11 @@ static int __devinit e1000_probe(struct pci_dev *pdev,
 
 	adapter->ecdev = ecdev_offer(netdev, ec_poll, THIS_MODULE);
 	if (adapter->ecdev) {
-		err = ecdev_open(adapter->ecdev);
-		if (err) {
+		adapter->ec_watchdog_jiffies = jiffies;
+		if (ecdev_open(adapter->ecdev)) {
 			ecdev_withdraw(adapter->ecdev);
 			goto err_register;
 		}
-		adapter->ec_watchdog_jiffies = jiffies;
 	} else {
 		strncpy(netdev->name, "eth%d", sizeof(netdev->name) - 1);
 		err = register_netdev(netdev);

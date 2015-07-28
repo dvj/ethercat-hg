@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id$
+ *  $Id: CommandRegWrite.cpp,v 2c3ccdde3919 2012/11/14 21:12:57 fp $
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -68,12 +68,10 @@ string CommandRegWrite::helpString(const string &binaryBaseName) const
         << typeInfo()
         << endl
         << "Command-specific options:" << endl
-        << "  --alias     -a <alias>" << endl
-        << "  --position  -p <pos>    Slave selection. See the help of"
-        << endl
-        << "                          the 'slaves' command." << endl
-        << "  --type      -t <type>   Data type (see above)." << endl
-        << "  --emergency -e          Send as emergency request." << endl
+        << "  --alias    -a <alias>" << endl
+        << "  --position -p <pos>    Slave selection. See the help of" << endl
+        << "                         the 'slaves' command." << endl
+        << "  --type     -t <type>   Data type (see above)." << endl
         << endl
         << numericInfo();
 
@@ -87,6 +85,7 @@ void CommandRegWrite::execute(const StringVector &args)
     stringstream strOffset, err;
     ec_ioctl_slave_reg_t io;
     ifstream file;
+    SlaveList slaves;
 
     if (args.size() != 2) {
         err << "'" << getName() << "' takes exactly two arguments!";
@@ -159,19 +158,12 @@ void CommandRegWrite::execute(const StringVector &args)
         throw e;
     }
 
-    if (getEmergency()) {
-        io.slave_position = emergencySlave();
-        io.emergency = true;
+    slaves = selectedSlaves(m);
+    if (slaves.size() != 1) {
+        delete [] io.data;
+        throwSingleSlaveRequired(slaves.size());
     }
-    else {
-        SlaveList slaves = selectedSlaves(m);
-        if (slaves.size() != 1) {
-            delete [] io.data;
-            throwSingleSlaveRequired(slaves.size());
-        }
-        io.slave_position = slaves.front().position;
-        io.emergency = false;
-    }
+    io.slave_position = slaves.front().position;
 
     // send data to master
     try {

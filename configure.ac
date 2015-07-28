@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------------
 #
-#  $Id$
+#  $Id: configure.ac,v 2eff7c993a63 2013/02/12 16:31:08 fp $
 #
 #  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
 #
@@ -41,7 +41,7 @@ AC_PREREQ(2.59)
 #
 AC_INIT([ethercat],[1.5.2],[fp@igh-essen.com])
 AC_CONFIG_AUX_DIR([autoconf])
-AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2 subdir-objects])
+AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_PREFIX_DEFAULT([/opt/etherlab])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([config.h.in])
@@ -57,41 +57,8 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 #------------------------------------------------------------------------------
-# Kernel modules
-#------------------------------------------------------------------------------
-
-AC_MSG_CHECKING([whether to build kernel modules])
-
-AC_ARG_ENABLE([kernel],
-    AS_HELP_STRING([--enable-kernel],
-                   [Enable building kernel modules]),
-    [
-        case "${enableval}" in
-            yes) enablekernel=1
-                ;;
-            no) enablekernel=0
-                ;;
-            *) AC_MSG_ERROR([Invalid value for --enable-generic])
-                ;;
-        esac
-    ],
-    [enablekernel=1]
-)
-
-if test "x$enablekernel" = "x1"; then
-    AC_MSG_RESULT([yes])
-else
-    AC_MSG_RESULT([no])
-fi
-
-AM_CONDITIONAL(ENABLE_KERNEL, test "x$enablekernel" = "x1")
-AC_SUBST(ENABLE_KERNEL,[$enablekernel])
-
-#------------------------------------------------------------------------------
 # Linux sources
 #------------------------------------------------------------------------------
-
-if test "x$enablekernel" = "x1"; then
 
 AC_ARG_WITH([linux-dir],
     AC_HELP_STRING(
@@ -149,8 +116,6 @@ linuxversion=`echo $kernelrelease | grep -oE "$regex"`
 AC_SUBST(LINUX_SOURCE_DIR,[$sourcedir])
 AC_MSG_RESULT([$LINUX_SOURCE_DIR (Kernel $linuxversion)])
 
-fi
-
 #------------------------------------------------------------------------------
 # Linux module installation subdirectory
 #------------------------------------------------------------------------------
@@ -185,7 +150,7 @@ AC_ARG_ENABLE([generic],
                 ;;
         esac
     ],
-    [enablegeneric=$enablekernel]
+    [enablegeneric=1]
 )
 
 AM_CONDITIONAL(ENABLE_GENERIC, test "x$enablegeneric" = "x1")
@@ -208,7 +173,7 @@ AC_ARG_ENABLE([8139too],
                 ;;
         esac
     ],
-    [enable8139too=$enablekernel]
+    [enable8139too=1]
 )
 
 AM_CONDITIONAL(ENABLE_8139TOO, test "x$enable8139too" = "x1")
@@ -392,7 +357,7 @@ AC_ARG_WITH([e1000e-kernel],
     ]
 )
 
-e1000elayout=0
+e1000elayout34=0
 
 if test "x${enablee1000e}" = "x1"; then
     AC_MSG_CHECKING([for kernel for e1000e driver])
@@ -410,18 +375,14 @@ if test "x${enablee1000e}" = "x1"; then
 
     AC_MSG_RESULT([$kernele1000e])
 
-    # check for e1000e file layout (changed in kernel 3.4 and 3.10)
+    # check for e1000e file layout (changed in kernel 3.4)
     AC_MSG_CHECKING([for e1000e source layout])
 
     file34="${srcdir}/devices/e1000e/80003es2lan-$kernele1000e-ethercat.c"
-    file310="${srcdir}/devices/e1000e/ptp-$kernele1000e-ethercat.c"
 
-    if test -r "$file310"; then
-        AC_MSG_RESULT([>= 3.10])
-        e1000elayout=2
-    elif test -r "$file34"; then
+    if test -r "$file34"; then
         AC_MSG_RESULT([>= 3.4])
-        e1000elayout=1
+        e1000elayout34=1
     else
         AC_MSG_RESULT([before 3.4])
     fi
@@ -429,7 +390,7 @@ if test "x${enablee1000e}" = "x1"; then
 fi
 
 AC_SUBST(KERNEL_E1000E,[$kernele1000e])
-AC_SUBST(E1000E_LAYOUT, [$e1000elayout])
+AC_SUBST(E1000E_LAYOUT_3_4, [$e1000elayout34])
 
 #------------------------------------------------------------------------------
 # r8169 driver
@@ -485,37 +446,6 @@ if test "x${enable_r8169}" = "x1"; then
 fi
 
 AC_SUBST(KERNEL_R8169,[$kernel_r8169])
-
-#------------------------------------------------------------------------------
-# CCAT driver
-#------------------------------------------------------------------------------
-
-AC_MSG_CHECKING([whether to build the CCAT driver])
-
-AC_ARG_ENABLE([ccat],
-    AS_HELP_STRING([--enable-ccat],
-                   [Enable CCAT driver]),
-    [
-        case "${enableval}" in
-            yes) enableccat=1
-                ;;
-            no) enableccat=0
-                ;;
-            *) AC_MSG_ERROR([Invalid value for --enable-ccat])
-                ;;
-        esac
-    ],
-    [enableccat=0] # disabled by default
-)
-
-if test "x${enableccat}" = "x1"; then
-    AC_MSG_RESULT([yes])
-else
-    AC_MSG_RESULT([no])
-fi
-
-AM_CONDITIONAL(ENABLE_CCAT, test "x$enableccat" = "x1")
-AC_SUBST(ENABLE_CCAT,[$enableccat])
 
 #------------------------------------------------------------------------------
 # RTAI path (optional)
@@ -820,35 +750,6 @@ else
 fi
 
 #------------------------------------------------------------------------------
-# Force the reference clock to OP even if unconfigured
-#------------------------------------------------------------------------------
-
-AC_MSG_CHECKING([whether to force the reference clock to OP])
-
-AC_ARG_ENABLE([refclkop],
-    AS_HELP_STRING([--enable-refclkop],
-                   [Force reference clock to OP (default: no)]),
-    [
-        case "${enableval}" in
-            yes) refclkop=1
-                ;;
-            no) refclkop=0
-                ;;
-            *) AC_MSG_ERROR([Invalid value for --enable-refclkop])
-                ;;
-        esac
-    ],
-    [refclkop=0]
-)
-
-if test "x${refclkop}" = "x1"; then
-    AC_DEFINE([EC_REFCLKOP], [1], [Force refclk to OP])
-    AC_MSG_RESULT([yes])
-else
-    AC_MSG_RESULT([no])
-fi
-
-#------------------------------------------------------------------------------
 # Command-line tool
 #-----------------------------------------------------------------------------
 
@@ -1031,64 +932,6 @@ else
 fi
 
 #------------------------------------------------------------------------------
-# syslog output in realtime context
-#------------------------------------------------------------------------------
-
-AC_MSG_CHECKING([whether to syslog in realtime context])
-
-AC_ARG_ENABLE([rt-syslog],
-    AS_HELP_STRING([--enable-rt-syslog],
-                   [Enable RT syslog (default: yes)]),
-    [
-        case "${enableval}" in
-            yes) rtsyslog=1
-                ;;
-            no) rtsyslog=0
-                ;;
-            *) AC_MSG_ERROR([Invalid value for --enable-rt-syslog])
-                ;;
-        esac
-    ],
-    [rtsyslog=1]
-)
-
-if test "x${rtsyslog}" = "x1"; then
-    AC_DEFINE([EC_RT_SYSLOG], [1], [Output to syslog in RT context])
-    AC_MSG_RESULT([yes])
-else
-    AC_MSG_RESULT([no])
-fi
-
-#------------------------------------------------------------------------------
-# use loop control registers to open slave ports
-#------------------------------------------------------------------------------
-
-AC_MSG_CHECKING([whether to use loop control registers])
-
-AC_ARG_ENABLE([loop-control],
-    AS_HELP_STRING([--enable-loop-control],
-                   [Use loop control registers (default: no)]),
-    [
-        case "${enableval}" in
-            yes) loopctl=1
-                ;;
-            no) loopctl=0
-                ;;
-            *) AC_MSG_ERROR([Invalid value for --enable-loop-control])
-                ;;
-        esac
-    ],
-    [loopctl=0]
-)
-
-if test "x${loopctl}" = "x1"; then
-    AC_DEFINE([EC_LOOP_CONTROL], [1], [Use loop control registers])
-    AC_MSG_RESULT([yes])
-else
-    AC_MSG_RESULT([no])
-fi
-
-#------------------------------------------------------------------------------
 
 AC_CONFIG_FILES([
         Doxyfile
@@ -1096,8 +939,6 @@ AC_CONFIG_FILES([
         Makefile
         devices/Kbuild
         devices/Makefile
-        devices/ccat/Kbuild
-        devices/ccat/Makefile
         devices/e1000/Kbuild
         devices/e1000/Makefile
         devices/e1000e/Kbuild

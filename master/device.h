@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: device.h,v 5cf6bb14a579 2012/11/30 19:25:18 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -48,7 +48,7 @@
  * different memory regions, because otherwise the network device DMA could
  * send the same data twice, if it is called twice.
  */
-#define EC_TX_RING_SIZE 0x10
+#define EC_TX_RING_SIZE 2
 
 #ifdef EC_DEBUG_IF
 #include "debug.h"

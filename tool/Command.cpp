@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id$
+ *  $Id: Command.cpp,v d461b1f07296 2012/11/30 19:15:31 fp $
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -150,9 +150,7 @@ class AliasPositionParser:
 Command::Command(const string &name, const string &briefDesc):
     name(name),
     briefDesc(briefDesc),
-    verbosity(Normal),
-    emergency(false),
-    force(false)
+    verbosity(Normal)
 {
 }
 
@@ -202,13 +200,6 @@ void Command::setDomains(const string &d)
 void Command::setDataType(const string &t)
 {
     dataType = t;
-};
-
-/*****************************************************************************/
-
-void Command::setEmergency(bool e)
-{
-    emergency = e;
 };
 
 /*****************************************************************************/
@@ -270,21 +261,21 @@ string Command::numericInfo()
 
 /*****************************************************************************/
 
-void Command::throwInvalidUsageException(const stringstream &s)
+void Command::throwInvalidUsageException(const stringstream &s) const
 {
     throw InvalidUsageException(s);
 }
 
 /*****************************************************************************/
 
-void Command::throwCommandException(const string &msg)
+void Command::throwCommandException(const string &msg) const
 {
     throw CommandException(msg);
 }
 
 /*****************************************************************************/
 
-void Command::throwCommandException(const stringstream &s)
+void Command::throwCommandException(const stringstream &s) const
 {
     throw CommandException(s);
 }
@@ -494,19 +485,6 @@ Command::DomainList Command::selectedDomains(MasterDevice &m,
     }
 
     return list;
-}
-
-/****************************************************************************/
-
-int Command::emergencySlave() const
-{
-    unsigned int ret;
-
-    stringstream str;
-    str << positions;
-    str >> ret;
-
-    return ret;
 }
 
 /****************************************************************************/

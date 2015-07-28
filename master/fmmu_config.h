@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: fmmu_config.h,v 11c0b2caa253 2009/02/24 12:51:39 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -49,8 +49,7 @@ typedef struct {
     const ec_domain_t *domain; /**< Domain. */
     uint8_t sync_index; /**< Index of sync manager to use. */
     ec_direction_t dir; /**< FMMU direction. */
-    uint32_t logical_domain_offset; /**< Logical offset address relative to
-                domain->logical_base_address. */
+    uint32_t logical_start_address; /**< Logical start address. */
     unsigned int data_size; /**< Covered PDO size. */
 } ec_fmmu_config_t;
 
@@ -58,15 +57,6 @@ typedef struct {
 
 void ec_fmmu_config_init(ec_fmmu_config_t *, ec_slave_config_t *,
         ec_domain_t *, uint8_t, ec_direction_t);
-
-/**
- * @param fmmu EtherCAT FMMU configuration.
- * @param logical_domain_offset Logical offset address 
-        relative to domain->logical_base_address.
- * @param data_size Covered PDO size.
-*/        
-void ec_fmmu_set_domain_offset_size(ec_fmmu_config_t *fmmu, 
-        uint32_t logical_domain_offset, unsigned data_size);
 
 void ec_fmmu_config_page(const ec_fmmu_config_t *, const ec_sync_t *,
         uint8_t *);

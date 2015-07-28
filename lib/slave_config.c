@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: slave_config.c,v 4ccf7634e664 2013/02/06 14:58:00 fp $
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -115,23 +115,6 @@ void ecrt_slave_config_watchdog(ec_slave_config_t *sc,
     if (EC_IOCTL_IS_ERROR(ret)) {
         fprintf(stderr, "Failed to config watchdog: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
-    }
-}
-
-/*****************************************************************************/
-
-void ecrt_slave_config_overlapping_pdos(ec_slave_config_t *sc,
-        uint8_t allow_overlapping_pdos)
-{
-    ec_ioctl_config_t data;
-
-    memset(&data, 0, sizeof(ec_ioctl_config_t));
-    data.config_index = sc->index;
-    data.allow_overlapping_pdos = allow_overlapping_pdos;
-
-    if (ioctl(sc->master->fd, EC_IOCTL_SC_OVERLAPPING_IO, &data) == -1) {
-        fprintf(stderr, "Failed to config overlapping PDOs: %s\n",
-                strerror(errno));
     }
 }
 

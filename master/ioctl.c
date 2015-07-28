@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: ioctl.c,v ec403cf308eb 2013/02/12 14:46:43 fp $
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -544,7 +544,7 @@ static ATTRIBUTES int ec_ioctl_domain_fmmu(
     data.slave_config_position = fmmu->sc->position;
     data.sync_index = fmmu->sync_index;
     data.dir = fmmu->dir;
-    data.logical_address = fmmu->domain->logical_base_address + fmmu->logical_domain_offset;
+    data.logical_address = fmmu->logical_start_address;
     data.data_size = fmmu->data_size;
 
     up(&master->master_sem);
@@ -864,7 +864,7 @@ static ATTRIBUTES int ec_ioctl_slave_sdo_download(
         return -ENOMEM;
     }
 
-    if (copy_from_user(sdo_data, (const void __user *) data.data, data.data_size)) {
+    if (copy_from_user(sdo_data, (void __user *) data.data, data.data_size)) {
         kfree(sdo_data);
         return -EFAULT;
     }
@@ -1144,23 +1144,16 @@ static ATTRIBUTES int ec_ioctl_slave_reg_write(
         return -EINTR;
     }
 
-    if (io.emergency) {
-        request.ring_position = io.slave_position;
-        // schedule request.
-        list_add_tail(&request.list, &master->emerg_reg_requests);
+    if (!(slave = ec_master_find_slave(master, 0, io.slave_position))) {
+        up(&master->master_sem);
+        ec_reg_request_clear(&request);
+        EC_MASTER_ERR(master, "Slave %u does not exist!\n",
+                io.slave_position);
+        return -EINVAL;
     }
-    else {
-        if (!(slave = ec_master_find_slave(master, 0, io.slave_position))) {
-            up(&master->master_sem);
-            ec_reg_request_clear(&request);
-            EC_MASTER_ERR(master, "Slave %u does not exist!\n",
-                    io.slave_position);
-            return -EINVAL;
-        }
 
-        // schedule request.
-        list_add_tail(&request.list, &slave->reg_requests);
-    }
+    // schedule request.
+    list_add_tail(&request.list, &slave->reg_requests);
 
     up(&master->master_sem);
 
@@ -1550,89 +1543,6 @@ static ATTRIBUTES int ec_ioctl_eoe_handler(
 
 /*****************************************************************************/
 
-/** Request EoE IP parameter setting.
- *
- * \return Zero on success, otherwise a negative error code.
- */
-static ATTRIBUTES int ec_ioctl_slave_eoe_ip_param(
-        ec_master_t *master, /**< EtherCAT master. */
-        void *arg /**< ioctl() argument. */
-        )
-{
-    ec_ioctl_slave_eoe_ip_t io;
-    ec_eoe_request_t req;
-    ec_slave_t *slave;
-
-    if (copy_from_user(&io, (void __user *) arg, sizeof(io))) {
-        return -EFAULT;
-    }
-
-    // init EoE request
-    ec_eoe_request_init(&req);
-
-    req.mac_address_included = io.mac_address_included;
-    req.ip_address_included = io.ip_address_included;
-    req.subnet_mask_included = io.subnet_mask_included;
-    req.gateway_included = io.gateway_included;
-    req.dns_included = io.dns_included;
-    req.name_included = io.name_included;
-
-    memcpy(req.mac_address, io.mac_address, ETH_ALEN);
-    req.ip_address = io.ip_address;
-    req.subnet_mask = io.subnet_mask;
-    req.gateway = io.gateway;
-    req.dns = io.dns;
-    memcpy(req.name, io.name, EC_MAX_HOSTNAME_SIZE);
-
-    req.state = EC_INT_REQUEST_QUEUED;
-
-    if (down_interruptible(&master->master_sem)) {
-        return -EINTR;
-    }
-
-    if (!(slave = ec_master_find_slave(
-                    master, 0, io.slave_position))) {
-        up(&master->master_sem);
-        EC_MASTER_ERR(master, "Slave %u does not exist!\n",
-                io.slave_position);
-        return -EINVAL;
-    }
-
-    EC_MASTER_DBG(master, 1, "Scheduling EoE request.\n");
-
-    // schedule request.
-    list_add_tail(&req.list, &slave->eoe_requests);
-
-    up(&master->master_sem);
-
-    // wait for processing through FSM
-    if (wait_event_interruptible(master->request_queue,
-                req.state != EC_INT_REQUEST_QUEUED)) {
-        // interrupted by signal
-        down(&master->master_sem);
-        if (req.state == EC_INT_REQUEST_QUEUED) {
-            // abort request
-            list_del(&req.list);
-            up(&master->master_sem);
-            return -EINTR;
-        }
-        up(&master->master_sem);
-    }
-
-    // wait until master FSM has finished processing
-    wait_event(master->request_queue, req.state != EC_INT_REQUEST_BUSY);
-
-    io.result = req.result;
-
-    if (copy_to_user((void __user *) arg, &io, sizeof(io))) {
-        return -EFAULT;
-    }
-
-    return req.state == EC_INT_REQUEST_SUCCESS ? 0 : -EIO;
-}
-
-/*****************************************************************************/
-
 /** Request the master from userspace.
  *
  * \return Zero on success, otherwise a negative error code.
@@ -1913,18 +1823,11 @@ static ATTRIBUTES int ec_ioctl_send(
         ec_ioctl_context_t *ctx /**< Private data structure of file handle. */
         )
 {
-    size_t sent_bytes;
-
     if (unlikely(!ctx->requested)) {
         return -EPERM;
     }
 
-    sent_bytes = ecrt_master_send(master);
-
-    if (copy_to_user((void __user *) arg, &sent_bytes, sizeof(sent_bytes))) {
-        return -EFAULT;
-    }
-
+    ecrt_master_send(master);
     return 0;
 }
 
@@ -2259,48 +2162,6 @@ out_return:
     return ret;
 }
 
-/*****************************************************************************/
-
-/** Configure wether a slave allows overlapping PDOs.
- */
-static ATTRIBUTES int ec_ioctl_sc_allow_overlapping_pdos(
-        ec_master_t *master, /**< EtherCAT master. */
-        void *arg, /**< ioctl() argument. */
-        ec_ioctl_context_t *ctx /**< Private data structure of file handle. */
-        )
-{
-    ec_ioctl_config_t data;
-    ec_slave_config_t *sc;
-    int ret = 0;
-
-    if (unlikely(!ctx->requested)) {
-        ret = -EPERM;
-        goto out_return;
-    }
-
-    if (copy_from_user(&data, (void __user *) arg, sizeof(data))) {
-        ret = -EFAULT;
-        goto out_return;
-    }
-
-    if (down_interruptible(&master->master_sem)) {
-        ret = -EINTR;
-        goto out_return;
-    }
-
-    if (!(sc = ec_master_get_config(master, data.config_index))) {
-        ret = -ENOENT;
-        goto out_up;
-    }
-
-    ecrt_slave_config_overlapping_pdos(sc,
-            data.allow_overlapping_pdos);
-
-out_up:
-    up(&master->master_sem);
-out_return:
-    return ret;
-}
 /*****************************************************************************/
 
 /** Add a PDO to the assignment.
@@ -4337,13 +4198,6 @@ long EC_IOCTL(
         case EC_IOCTL_SLAVE_SOE_READ:
             ret = ec_ioctl_slave_soe_read(master, arg);
             break;
-        case EC_IOCTL_SLAVE_EOE_IP_PARAM:
-            if (!ctx->writable) {
-                ret = -EPERM;
-                break;
-            }
-            ret = ec_ioctl_slave_eoe_ip_param(master, arg);
-            break;
         case EC_IOCTL_SLAVE_SOE_WRITE:
             if (!ctx->writable) {
                 ret = -EPERM;
@@ -4495,13 +4349,6 @@ long EC_IOCTL(
                 break;
             }
             ret = ec_ioctl_sc_watchdog(master, arg, ctx);
-            break;
-        case EC_IOCTL_SC_OVERLAPPING_IO:
-            if (!ctx->writable) {
-                ret = -EPERM;
-                break;
-            }
-            ret = ec_ioctl_sc_allow_overlapping_pdos(master, arg, ctx);
             break;
         case EC_IOCTL_SC_ADD_PDO:
             if (!ctx->writable) {

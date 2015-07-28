@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------------
 #
-#  $Id$
+#  $Id: Makefile.am,v bc2d4bf9cbe5 2012/09/06 18:22:24 fp $
 #
 #  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
 #
@@ -48,7 +48,6 @@ ethercat_SOURCES = \
 	CommandFoeRead.cpp \
 	CommandFoeWrite.cpp \
 	CommandGraph.cpp \
-	CommandIp.cpp \
 	CommandMaster.cpp \
 	CommandPdos.cpp \
 	CommandRegRead.cpp \
@@ -91,7 +90,6 @@ noinst_HEADERS = \
 	CommandFoeRead.h \
 	CommandFoeWrite.h \
 	CommandGraph.h \
-	CommandIp.h \
 	CommandMaster.h \
 	CommandPdos.h \
 	CommandRegRead.h \

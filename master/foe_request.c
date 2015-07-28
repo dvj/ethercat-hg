@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: foe_request.c,v ec403cf308eb 2013/02/12 14:46:43 fp $
  *
  *  Copyright (C) 2008  Olav Zarges, imc Messsysteme GmbH
  *

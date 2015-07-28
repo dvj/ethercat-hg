@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------------
 #
-#  $Id$
+#  $Id: Makefile.am,v bc2d4bf9cbe5 2012/09/06 18:22:24 fp $
 #
 #  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
 #
@@ -30,13 +30,10 @@
 ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = \
+	devices \
 	include \
+	master \
 	script
-
-if ENABLE_KERNEL
-SUBDIRS += devices
-SUBDIRS += master
-endif
 
 if BUILD_TOOL
 SUBDIRS += tool
@@ -119,11 +116,7 @@ mrproper: clean cleandoc
 		configure \
 		configure.in \
 		libtool \
-		stamp-h1 \
-		ethercat.spec \
-		script/init.d/ethercat \
-		m4/*.m4 \
-		`find -path ./documentation -prune -o "(" -name Makefile -o -name Makefile.in -o -name Kbuild -o -name .deps -o -name Module.symvers -o -name .tmp_versions ")" -print`
+		stamp-h1
 
 doc:
 	doxygen Doxyfile

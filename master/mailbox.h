@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: mailbox.h,v c0b4c64fcebd 2012/12/07 18:51:55 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -44,18 +44,6 @@
 /** Size of the mailbox header.
  */
 #define EC_MBOX_HEADER_SIZE 6
-
-/** Mailbox types.
- *
- * These are used in the 'Type' field of the mailbox header.
- */
-enum {
-    EC_MBOX_TYPE_EOE = 0x02,
-    EC_MBOX_TYPE_COE = 0x03,
-    EC_MBOX_TYPE_FOE = 0x04,
-    EC_MBOX_TYPE_SOE = 0x05,
-    EC_MBOX_TYPE_VOE = 0x0f,
-};
 
 /*****************************************************************************/
 

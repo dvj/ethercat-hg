@@ -47,7 +47,6 @@
 
 #------------------------------------------------------------------------------
 
-LSMOD=/sbin/lsmod
 MODPROBE=/sbin/modprobe
 RMMOD=/sbin/rmmod
 MODINFO=/sbin/modinfo
@@ -178,7 +177,7 @@ start)
             continue # ec_* module not found
         fi
         if [ ${MODULE} != "generic" ]; then
-            if ${LSMOD} | grep "^${MODULE} " > /dev/null; then
+            if lsmod | grep "^${MODULE} " > /dev/null; then
                 if ! ${RMMOD} ${MODULE}; then
                     exit_fail
                 fi
@@ -201,7 +200,7 @@ stop)
     # unload EtherCAT device modules
     for MODULE in ${DEVICE_MODULES} master; do
         ECMODULE=ec_${MODULE}
-        if ! ${LSMOD} | grep -q "^${ECMODULE} "; then
+        if ! lsmod | grep -q "^${ECMODULE} "; then
             continue # ec_* module not loaded
         fi
         if ! ${RMMOD} ${ECMODULE}; then
@@ -227,7 +226,6 @@ restart)
     $0 stop || exit 1
     sleep 1
     $0 start
-    exit
     ;;
 
 status)

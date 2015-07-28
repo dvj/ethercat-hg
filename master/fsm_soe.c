@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: fsm_soe.c,v 9cdd7669dc0b 2013/01/10 16:36:41 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -41,9 +41,13 @@
 
 /*****************************************************************************/
 
+/** Mailbox type for SoE.
+ */
+#define EC_MBOX_TYPE_SOE 0x05
+
 /** SoE operations
  */
-enum {
+enum ec_soe_opcodes {
     OPCODE_READ_REQUEST   = 0x01, /**< Read request. */
     OPCODE_READ_RESPONSE  = 0x02, /**< Read response. */
     OPCODE_WRITE_REQUEST  = 0x03, /**< Write request. */

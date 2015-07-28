@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
+ *  $Id: ethernet.c,v ec403cf308eb 2013/02/12 14:46:43 fp $
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -79,7 +79,6 @@ int ec_eoedev_open(struct net_device *);
 int ec_eoedev_stop(struct net_device *);
 int ec_eoedev_tx(struct sk_buff *, struct net_device *);
 struct net_device_stats *ec_eoedev_stats(struct net_device *);
-static int ec_eoedev_set_mac(struct net_device *netdev, void *p);
 
 /*****************************************************************************/
 
@@ -91,31 +90,8 @@ static const struct net_device_ops ec_eoedev_ops = {
     .ndo_stop = ec_eoedev_stop,
     .ndo_start_xmit = ec_eoedev_tx,
     .ndo_get_stats = ec_eoedev_stats,
-    .ndo_set_mac_address = ec_eoedev_set_mac,
 };
 #endif
-
-/*****************************************************************************/
-
-/**
- * ec_eoedev_set_mac - Change the Ethernet Address of the NIC
- * @netdev: network interface device structure
- * @p: pointer to an address structure
- *
- * Returns 0 on success, negative on failure
- **/
-static int
-ec_eoedev_set_mac(struct net_device *netdev, void *p)
-{
-   struct sockaddr *addr = p;
-
-   if (!is_valid_ether_addr(addr->sa_data))
-      return -EADDRNOTAVAIL;
-
-   memcpy(netdev->dev_addr, addr->sa_data, netdev->addr_len);
-
-   return 0;
-}
 
 /*****************************************************************************/
 
@@ -131,12 +107,8 @@ int ec_eoe_init(
         )
 {
     ec_eoe_t **priv;
-    int ret = 0;
+    int i, ret = 0;
     char name[EC_DATAGRAM_NAME_SIZE];
-
-    struct net_device *dev;
-    unsigned char lo_mac[ETH_ALEN] = {0};
-    unsigned int use_master_mac = 0;
 
     eoe->slave = slave;
 
@@ -193,65 +165,8 @@ int ec_eoe_init(
     eoe->dev->get_stats = ec_eoedev_stats;
 #endif
 
-    // First check if the MAC address assigned to the master is globally
-    // unique
-    if ((slave->master->devices[EC_DEVICE_MAIN].dev->dev_addr[0] & 0x02) !=
-            0x02) {
-        // The master MAC is unique and the NIC part can be used for the EoE
-        // interface MAC
-        use_master_mac = 1;
-    }
-    else {
-        // The master MAC is not unique, so we check for unique MAC in other
-        // interfaces
-        dev = first_net_device(&init_net);
-        while (dev) {
-            // Check if globally unique MAC address
-            if (dev->addr_len == ETH_ALEN) {
-                if (memcmp(dev->dev_addr, lo_mac, ETH_ALEN) != 0) {
-                    if ((dev->dev_addr[0] & 0x02) != 0x02) {
-                        // The first globally unique MAC address has been
-                        // identified
-                        break;
-                    }
-                }
-            }
-            dev = next_net_device(dev);
-        }
-        if (eoe->dev->addr_len == ETH_ALEN) {
-            if (dev) {
-                // A unique MAC were identified in one of the other network
-                // interfaces and the NIC part can be used for the EoE
-                // interface MAC.
-                EC_SLAVE_INFO(slave, "%s MAC address derived from"
-                        " NIC part of %s MAC address",
-                    eoe->dev->name, dev->name);
-                eoe->dev->dev_addr[1] = dev->dev_addr[3];
-                eoe->dev->dev_addr[2] = dev->dev_addr[4];
-                eoe->dev->dev_addr[3] = dev->dev_addr[5];
-            }
-            else {
-                use_master_mac = 1;
-            }
-        }
-    }
-    if (eoe->dev->addr_len == ETH_ALEN) {
-        if (use_master_mac) {
-            EC_SLAVE_INFO(slave, "%s MAC address derived"
-                    " from NIC part of %s MAC address",
-                eoe->dev->name,
-                slave->master->devices[EC_DEVICE_MAIN].dev->name);
-            eoe->dev->dev_addr[1] =
-                slave->master->devices[EC_DEVICE_MAIN].dev->dev_addr[3];
-            eoe->dev->dev_addr[2] =
-                slave->master->devices[EC_DEVICE_MAIN].dev->dev_addr[4];
-            eoe->dev->dev_addr[3] =
-                slave->master->devices[EC_DEVICE_MAIN].dev->dev_addr[5];
-        }
-        eoe->dev->dev_addr[0] = 0x02;
-        eoe->dev->dev_addr[4] = (uint8_t)(slave->ring_position >> 8);
-        eoe->dev->dev_addr[5] = (uint8_t)(slave->ring_position);
-    }
+    for (i = 0; i < ETH_ALEN; i++)
+        eoe->dev->dev_addr[i] = i | (i << 4);
 
     // initialize private data
     priv = netdev_priv(eoe->dev);
@@ -273,6 +188,8 @@ int ec_eoe_init(
         goto out_free;
     }
 
+    // make the last address octet unique
+    eoe->dev->dev_addr[ETH_ALEN - 1] = (uint8_t) eoe->dev->ifindex;
     return 0;
 
  out_free:
@@ -349,8 +266,7 @@ int ec_eoe_send(ec_eoe_t *eoe /**< EoE handler */)
         current_size = remaining_size;
         last_fragment = 1;
     } else {
-        current_size =
-            ((eoe->slave->configured_tx_mailbox_size - 10) / 32) * 32;
+        current_size = ((eoe->slave->configured_tx_mailbox_size - 10) / 32) * 32;
         last_fragment = 0;
     }
 
@@ -383,11 +299,11 @@ int ec_eoe_send(ec_eoe_t *eoe /**< EoE handler */)
 #endif
 
     data = ec_slave_mbox_prepare_send(eoe->slave, &eoe->datagram,
-            EC_MBOX_TYPE_EOE, current_size + 4);
+            0x02, current_size + 4);
     if (IS_ERR(data))
         return PTR_ERR(data);
 
-    EC_WRITE_U8 (data, EC_EOE_FRAMETYPE_INIT_REQ); // Initiate EoE Request
+    EC_WRITE_U8 (data,     0x00); // eoe fragment req.
     EC_WRITE_U8 (data + 1, last_fragment);
     EC_WRITE_U16(data + 2, ((eoe->tx_fragment_number & 0x3F) |
                             (complete_offset & 0x3F) << 6 |
@@ -562,7 +478,7 @@ void ec_eoe_state_rx_fetch(ec_eoe_t *eoe /**< EoE handler */)
         return;
     }
 
-    if (mbox_prot != EC_MBOX_TYPE_EOE) { // FIXME mailbox handler necessary
+    if (mbox_prot != 0x02) { // EoE FIXME mailbox handler necessary
         eoe->stats.rx_errors++;
 #if EOE_DEBUG_LEVEL >= 1
         EC_SLAVE_WARN(eoe->slave, "Other mailbox protocol response for %s.\n",
@@ -574,7 +490,7 @@ void ec_eoe_state_rx_fetch(ec_eoe_t *eoe /**< EoE handler */)
 
     frame_type = EC_READ_U16(data) & 0x000F;
 
-    if (frame_type != EC_EOE_FRAMETYPE_INIT_REQ) { // EoE Fragment Data
+    if (frame_type != 0x00) {
 #if EOE_DEBUG_LEVEL >= 1
         EC_SLAVE_WARN(eoe->slave, "%s: Other frame received."
                 " Dropping.\n", eoe->dev->name);
