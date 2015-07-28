@@ -50,7 +50,7 @@ noinst_HEADERS = \
 	slave_config.h \
 	voe_handler.h
 
-libethercat_la_CFLAGS = -fno-strict-aliasing -Wall
+libethercat_la_CFLAGS = -fno-strict-aliasing -Wall -I$(top_srcdir)
 libethercat_la_LDFLAGS = -version-info 1:0:0
 
 #------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ if ENABLE_RTDM
 lib_LTLIBRARIES += libethercat_rtdm.la
 
 libethercat_rtdm_la_SOURCES = $(libethercat_la_SOURCES)
-libethercat_rtdm_la_CFLAGS = $(libethercat_la_CFLAGS) -DUSE_RTDM -I$(top_srcdir)
+libethercat_rtdm_la_CFLAGS = $(libethercat_la_CFLAGS) -DUSE_RTDM
 libethercat_rtdm_la_LDFLAGS = $(libethercat_la_LDFLAGS)
 
 if ENABLE_XENOMAI
