@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: e100-3.4-ethercat.c,v fcd918d2122f 2013/01/08 11:01:17 fp $
+ *  $Id$
  *
  *  Copyright (C) 2007-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -2122,7 +2122,9 @@ process_skb:
 
 			// No need to detect link status as
 			// long as frames are received: Reset watchdog.
-			nic->ec_watchdog_jiffies = jiffies;
+			if (ecdev_get_link(nic->ecdev)) {
+				nic->ec_watchdog_jiffies = jiffies;
+			}
 		} else {
 			netif_receive_skb(skb);
 		}
@@ -3094,7 +3096,8 @@ static int __devinit e100_probe(struct pci_dev *pdev,
 		   pdev->irq, netdev->dev_addr);
 
 	if (nic->ecdev) {
-		if (ecdev_open(nic->ecdev)) {
+		err = ecdev_open(nic->ecdev);
+		if (err) {
 			ecdev_withdraw(nic->ecdev);
 			goto err_out_free;
 		}

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: fsm_pdo_entry.h,v 9cdd7669dc0b 2013/01/10 16:36:41 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

@@ -2,7 +2,7 @@
  *
  *  RTAI sample for the IgH EtherCAT master.
  *
- *  $Id: rtai_sample.c,v bc2d4bf9cbe5 2012/09/06 18:22:24 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

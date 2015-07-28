@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: reg_request.c,v ec403cf308eb 2013/02/12 14:46:43 fp $
+ *  $Id$
  *
  *  Copyright (C) 2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -62,6 +62,7 @@ int ec_reg_request_init(
     reg->address = 0;
     reg->transfer_size = 0;
     reg->state = EC_INT_REQUEST_INIT;
+    reg->ring_position = 0;
     return 0;
 }
 

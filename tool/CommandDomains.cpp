@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id: CommandDomains.cpp,v d461b1f07296 2012/11/30 19:15:31 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *

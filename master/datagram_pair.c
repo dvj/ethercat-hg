@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: datagram_pair.c,v ec403cf308eb 2013/02/12 14:46:43 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -185,7 +185,9 @@ uint16_t ec_datagram_pair_process(
             dev_idx++) {
         ec_datagram_t *datagram = &pair->datagrams[dev_idx];
 
+#ifdef EC_RT_SYSLOG
         ec_datagram_output_stats(datagram);
+#endif
 
         if (datagram->state == EC_DATAGRAM_RECEIVED) {
             pair_wc += datagram->working_counter;

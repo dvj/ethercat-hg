@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: doxygen.c,v 6d9865c37b6f 2013/02/12 16:15:09 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

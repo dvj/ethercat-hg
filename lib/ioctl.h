@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: common.c,v 572948e8b2ed 2012/07/09 08:29:15 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *

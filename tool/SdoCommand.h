@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id: SdoCommand.h,v 20748e9d2238 2010/03/05 12:39:57 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: master.c,v ec403cf308eb 2013/02/12 14:46:43 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -59,6 +59,10 @@
 /** Set to 1 to enable external datagram injection debugging.
  */
 #define DEBUG_INJECT 0
+
+/** Always output corrupted frames.
+ */
+#define FORCE_OUTPUT_CORRUPTED 0
 
 #ifdef EC_HAVE_CYCLES
 
@@ -232,6 +236,7 @@ int ec_master_init(ec_master_t *master, /**< EtherCAT master */
     master->app_cb_data = NULL;
 
     INIT_LIST_HEAD(&master->sii_requests);
+    INIT_LIST_HEAD(&master->emerg_reg_requests);
 
     init_waitqueue_head(&master->request_queue);
 
@@ -847,9 +852,13 @@ void ec_master_inject_external_datagrams(
                     > ext_injection_timeout_jiffies)
 #endif
             {
+#if defined EC_RT_SYSLOG || DEBUG_INJECT
                 unsigned int time_us;
+#endif
 
                 datagram->state = EC_DATAGRAM_ERROR;
+
+#if defined EC_RT_SYSLOG || DEBUG_INJECT
 #ifdef EC_HAVE_CYCLES
                 time_us = (unsigned int)
                     ((cycles_now - datagram->cycles_sent) * 1000LL)
@@ -862,6 +871,7 @@ void ec_master_inject_external_datagrams(
                         " external datagram %s size=%zu,"
                         " max_queue_size=%zu\n", time_us, datagram->name,
                         datagram->data_size, master->max_queue_size);
+#endif
             }
             else {
 #if DEBUG_INJECT
@@ -939,8 +949,10 @@ void ec_master_queue_datagram(
     list_for_each_entry(queued_datagram, &master->datagram_queue, queue) {
         if (queued_datagram == datagram) {
             datagram->skip_count++;
+#ifdef EC_RT_SYSLOG
             EC_MASTER_DBG(master, 1,
                     "Datagram %p already queued (skipping).\n", datagram);
+#endif
             datagram->state = EC_DATAGRAM_QUEUED;
             return;
         }
@@ -1106,10 +1118,12 @@ void ec_master_send_datagrams(
  *
  * \return 0 in case of success, else < 0
  */
-void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
-                                 const uint8_t *frame_data, /**< frame data */
-                                 size_t size /**< size of the received data */
-                                 )
+void ec_master_receive_datagrams(
+        ec_master_t *master, /**< EtherCAT master */
+        ec_device_t *device, /**< EtherCAT device */
+        const uint8_t *frame_data, /**< frame data */
+        size_t size /**< size of the received data */
+        )
 {
     size_t frame_size, data_size;
     uint8_t datagram_type, datagram_index;
@@ -1118,14 +1132,16 @@ void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
     ec_datagram_t *datagram;
 
     if (unlikely(size < EC_FRAME_HEADER_SIZE)) {
-        if (master->debug_level) {
+        if (master->debug_level || FORCE_OUTPUT_CORRUPTED) {
             EC_MASTER_DBG(master, 0, "Corrupted frame received"
-                    " (size %zu < %u byte):\n",
-                    size, EC_FRAME_HEADER_SIZE);
+                    " on %s (size %zu < %u byte):\n",
+                    device->dev->name, size, EC_FRAME_HEADER_SIZE);
             ec_print_data(frame_data, size);
         }
         master->stats.corrupted++;
+#ifdef EC_RT_SYSLOG
         ec_master_output_stats(master);
+#endif
         return;
     }
 
@@ -1136,14 +1152,17 @@ void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
     cur_data += EC_FRAME_HEADER_SIZE;
 
     if (unlikely(frame_size > size)) {
-        if (master->debug_level) {
+        if (master->debug_level || FORCE_OUTPUT_CORRUPTED) {
             EC_MASTER_DBG(master, 0, "Corrupted frame received"
-                    " (invalid frame size %zu for "
-                    "received size %zu):\n", frame_size, size);
+                    " on %s (invalid frame size %zu for "
+                    "received size %zu):\n", device->dev->name,
+                    frame_size, size);
             ec_print_data(frame_data, size);
         }
         master->stats.corrupted++;
+#ifdef EC_RT_SYSLOG
         ec_master_output_stats(master);
+#endif
         return;
     }
 
@@ -1158,13 +1177,16 @@ void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
 
         if (unlikely(cur_data - frame_data
                      + data_size + EC_DATAGRAM_FOOTER_SIZE > size)) {
-            if (master->debug_level) {
+            if (master->debug_level || FORCE_OUTPUT_CORRUPTED) {
                 EC_MASTER_DBG(master, 0, "Corrupted frame received"
-                        " (invalid data size %zu):\n", data_size);
+                        " on %s (invalid data size %zu):\n",
+                        device->dev->name, data_size);
                 ec_print_data(frame_data, size);
             }
             master->stats.corrupted++;
+#ifdef EC_RT_SYSLOG
             ec_master_output_stats(master);
+#endif
             return;
         }
 
@@ -1183,7 +1205,9 @@ void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
         // no matching datagram was found
         if (!matched) {
             master->stats.unmatched++;
+#ifdef EC_RT_SYSLOG
             ec_master_output_stats(master);
+#endif
 
             if (unlikely(master->debug_level > 0)) {
                 EC_MASTER_DBG(master, 0, "UNMATCHED datagram:\n");
@@ -2476,6 +2500,8 @@ void ecrt_master_receive(ec_master_t *master)
             list_del_init(&datagram->queue);
             datagram->state = EC_DATAGRAM_TIMED_OUT;
             master->stats.timeouts++;
+
+#ifdef EC_RT_SYSLOG
             ec_master_output_stats(master);
 
             if (unlikely(master->debug_level > 0)) {
@@ -2493,6 +2519,7 @@ void ecrt_master_receive(ec_master_t *master)
                         " index %02X waited %u us.\n",
                         datagram, datagram->index, time_us);
             }
+#endif /* RT_SYSLOG */
         }
     }
 }
@@ -2624,12 +2651,18 @@ int ecrt_master_get_slave(ec_master_t *master, uint16_t slave_position,
 {
     const ec_slave_t *slave;
     unsigned int i;
+    int ret = 0;
 
     if (down_interruptible(&master->master_sem)) {
         return -EINTR;
     }
 
     slave = ec_master_find_slave_const(master, 0, slave_position);
+
+    if (slave == NULL) {
+       ret = -ENOENT;
+       goto out_get_slave;
+    }
 
     slave_info->position = slave->ring_position;
     slave_info->vendor_id = slave->sii.vendor_id;
@@ -2667,9 +2700,10 @@ int ecrt_master_get_slave(ec_master_t *master, uint16_t slave_position,
         slave_info->name[0] = 0;
     }
 
+out_get_slave:
     up(&master->master_sem);
 
-    return 0;
+    return ret;
 }
 
 /*****************************************************************************/

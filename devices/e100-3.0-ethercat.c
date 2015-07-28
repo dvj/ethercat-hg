@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: e100-3.0-ethercat.c,v 97ec7e18412e 2012/04/10 17:09:16 fp $
+ *  $Id$
  *
  *  Copyright (C) 2007-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -3029,7 +3029,8 @@ static int __devinit e100_probe(struct pci_dev *pdev,
 		   pdev->irq, netdev->dev_addr);
 
 	if (nic->ecdev) {
-		if (ecdev_open(nic->ecdev)) {
+		err = ecdev_open(nic->ecdev);
+		if (err) {
 			ecdev_withdraw(nic->ecdev);
 			goto err_out_free;
 		}

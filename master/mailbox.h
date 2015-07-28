@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: mailbox.h,v c0b4c64fcebd 2012/12/07 18:51:55 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

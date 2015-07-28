@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: main.c,v 3bdd7a747fae 2012/09/20 13:28:25 fp $
+ *  $Id$
  *
  *  Copyright (C) 2009-2010  Moehwald GmbH B. Benner
  *                     2011  IgH Andreas Stewering-Bone

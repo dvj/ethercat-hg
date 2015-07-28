@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: sdo_entry.h,v cb2188d111f3 2009/04/08 08:13:33 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

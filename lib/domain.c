@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: domain.c,v 5ef9d5b14879 2013/02/05 14:24:45 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: fsm_foe.h,v 9cdd7669dc0b 2013/01/10 16:36:41 fp $
+ *  $Id$
  *
  *  Copyright (C) 2008       Olav Zarges, imc Messsysteme GmbH
  *                2009-2012  Florian Pose <fp@igh-essen.com>

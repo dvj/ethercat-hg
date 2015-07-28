@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: device.c,v ec403cf308eb 2013/02/12 14:46:43 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -663,7 +663,7 @@ void ecdev_receive(
     ec_device_debug_ring_append(device, RX, ec_data, ec_size);
 #endif
 
-    ec_master_receive_datagrams(device->master, ec_data, ec_size);
+    ec_master_receive_datagrams(device->master, device, ec_data, ec_size);
 }
 
 /*****************************************************************************/

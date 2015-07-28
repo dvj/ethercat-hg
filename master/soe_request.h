@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: soe_request.h,v 7d9fb723fc4b 2010/07/20 08:52:31 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

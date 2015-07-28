@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: soe_errors.c,v 7b77000f9764 2010/03/19 11:01:32 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

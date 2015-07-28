@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id: CommandConfig.cpp,v 4151f6f4c3e1 2012/10/09 07:52:50 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: e100-2.6.27-ethercat.c,v 44f6ca6974fd 2010/02/22 21:08:45 fp $
+ *  $Id$
  *
  *  Copyright (C) 2007-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -2896,7 +2896,8 @@ static int __devinit e100_probe(struct pci_dev *pdev,
 	// offer device to EtherCAT master module
 	nic->ecdev = ecdev_offer(netdev, e100_ec_poll, THIS_MODULE);
 	if (nic->ecdev) {
-		if (ecdev_open(nic->ecdev)) {
+		err = ecdev_open(nic->ecdev);
+		if (err) {
 			ecdev_withdraw(nic->ecdev);
 			goto err_out_free;
 		}

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: voe_handler.c,v b7f84bebd965 2012/12/06 12:53:38 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *

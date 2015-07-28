@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: module.c,v e5640f5e10a2 2013/02/12 10:52:03 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: ethernet.h,v db932582b674 2012/01/10 09:43:36 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

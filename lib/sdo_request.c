@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: sdo_request.c,v 9640948881fd 2012/12/06 12:53:09 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *

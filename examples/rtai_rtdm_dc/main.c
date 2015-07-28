@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: main.c,v c5c81a52fc30 2013/02/12 15:37:11 fp $
+ *  $Id$
  *
  *  Copyright (C)      2011  IgH Andreas Stewering-Bone
  *                     2012  Florian Pose <fp@igh-essen.com>

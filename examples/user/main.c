@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id: main.c,v 6a6dec6fc806 2012/09/19 17:46:58 fp $
+ *  $Id$
  *
  *  Copyright (C) 2007-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *

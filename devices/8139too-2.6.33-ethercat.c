@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: 8139too-2.6.33-ethercat.c,v cceb9aacf4a6 2011/03/03 08:05:40 ab $
+ *  $Id$
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -1134,9 +1134,12 @@ static int __devinit rtl8139_init_one (struct pci_dev *pdev,
 	if (rtl_chip_info[tp->chipset].flags & HasHltClk)
 		RTL_W8 (HltClk, 'H');	/* 'R' would leave the clock running. */
 
-	if (tp->ecdev && ecdev_open(tp->ecdev)) {
-		ecdev_withdraw(tp->ecdev);
-		goto err_out;
+	if (tp->ecdev) {
+		i = ecdev_open(tp->ecdev);
+		if (i) {
+			ecdev_withdraw(tp->ecdev);
+			goto err_out;
+		}
 	}
 
 	return 0;

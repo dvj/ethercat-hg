@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id: SoeCommand.cpp,v 23c638a81fe7 2010/10/24 06:43:44 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *

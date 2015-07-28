@@ -51,6 +51,10 @@ ifeq (@ENABLE_8139TOO@,1)
 	CFLAGS_$(EC_8139TOO_OBJ) = -DREV=$(REV)
 endif
 
+ifeq (@ENABLE_CCAT@,1)
+	obj-m += ccat/
+endif
+
 ifeq (@ENABLE_E100@,1)
 	EC_E100_OBJ := e100-@KERNEL_E100@-ethercat.o
 	obj-m += ec_e100.o

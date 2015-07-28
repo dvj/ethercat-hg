@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: slave_config.c,v 4ccf7634e664 2013/02/06 14:58:00 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *

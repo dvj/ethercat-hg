@@ -28,7 +28,7 @@
 
 *******************************************************************************/
 
-#include "e1000-2.6.27-ethercat.h"
+#include "e1000-2.6.28-ethercat.h"
 #include <net/ip6_checksum.h>
 
 char e1000_driver_name[] = "ec_e1000";
@@ -1247,7 +1247,8 @@ static int __devinit e1000_probe(struct pci_dev *pdev,
  	// offer device to EtherCAT master module
  	adapter->ecdev = ecdev_offer(netdev, ec_poll, THIS_MODULE);
  	if (adapter->ecdev) {
- 		if (ecdev_open(adapter->ecdev)) {
+		err = ecdev_open(adapter->ecdev);
+		if (err) {
  			ecdev_withdraw(adapter->ecdev);
  			goto err_register;
  		}

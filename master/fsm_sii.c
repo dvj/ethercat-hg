@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: fsm_sii.c,v b481ccf21272 2010/09/22 10:26:32 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

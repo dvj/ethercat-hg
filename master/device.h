@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: device.h,v 5cf6bb14a579 2012/11/30 19:25:18 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *

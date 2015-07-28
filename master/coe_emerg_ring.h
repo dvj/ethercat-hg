@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: coe_emerg_ring.h,v ec403cf308eb 2013/02/12 14:46:43 fp $
+ *  $Id$
  *
  *  Copyright (C) 2012  Florian Pose, Ingenieurgemeinschaft IgH
  *

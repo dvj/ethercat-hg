@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: master.h,v ec403cf308eb 2013/02/12 14:46:43 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
  *
@@ -305,6 +305,8 @@ struct ec_master {
     void *app_cb_data; /**< Application callback data. */
 
     struct list_head sii_requests; /**< SII write requests. */
+    struct list_head emerg_reg_requests; /**< Emergency register access
+                                           requests. */
 
     wait_queue_head_t request_queue; /**< Wait queue for external requests
                                        from user space. */
@@ -341,7 +343,8 @@ void ec_master_eoe_stop(ec_master_t *);
 #endif
 
 // datagram IO
-void ec_master_receive_datagrams(ec_master_t *, const uint8_t *, size_t);
+void ec_master_receive_datagrams(ec_master_t *, ec_device_t *,
+        const uint8_t *, size_t);
 void ec_master_queue_datagram(ec_master_t *, ec_datagram_t *);
 void ec_master_queue_datagram_ext(ec_master_t *, ec_datagram_t *);
 

@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *  $Id: NumberListParser.cpp,v ee4782738e30 2011/01/04 07:36:41 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2009  Florian Pose, Ingenieurgemeinschaft IgH
  *

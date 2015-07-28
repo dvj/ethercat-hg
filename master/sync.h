@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  $Id: sync.h,v 4c335a1d4db0 2011/10/24 08:47:36 fp $
+ *  $Id$
  *
  *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
  *
